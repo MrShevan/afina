@@ -2,6 +2,8 @@
 #define AFINA_STORAGE_MAP_BASED_GLOBAL_LOCK_IMPL_H
 
 #include <map>
+#include <set>
+#include <utility>
 #include <mutex>
 #include <string>
 
@@ -36,8 +38,18 @@ public:
     bool Get(const std::string &key, std::string &value) const override;
 
 private:
+    struct comparator {
+        bool operator() (std::pair<size_t, std::string> a, std::pair<size_t, std::string> b) {
+            return a.first <= b.first;
+        }
+    };
+
+    std::mutex _lock;
+
     size_t _max_size;
-    std::map<std::string, std::string> _backend;
+
+    std::map< std::string, std::pair<size_t, std::string> > _backend;
+    std::set< std::pair<size_t, std::string>, comparator> _priorities;
 };
 
 } // namespace Backend
