@@ -20,6 +20,12 @@ bool MapBasedGlobalLockImpl::Put(const std::string &key, const std::string &valu
 		this->_priorities.erase(this->_priorities.begin());
 	}
 
+	if (this->current_size + value.size() + key.size() > this->_max_size) {
+		this->_backend.erase((*this->_priorities.begin()).second);
+		this->_priorities.erase(this->_priorities.begin());
+	}
+	
+
 	map< string, pair<size_t, string> >::iterator it = this->_backend.find(key);
 
 	if (it == this->_backend.end()) {
@@ -32,6 +38,8 @@ bool MapBasedGlobalLockImpl::Put(const std::string &key, const std::string &valu
 		p1.second = value;
 
 		this->_backend[key] = p1;
+
+		this->current_size += value.size() + key.size();
 	} else {
 		pair<size_t, string> p;
 		p.first = (*it).second.first;
@@ -43,8 +51,13 @@ bool MapBasedGlobalLockImpl::Put(const std::string &key, const std::string &valu
 
 		(*it).second.first = max_priority + 1;
 		(*it).second.second = value;
+
+		this->current_size -= value.size();
+		this->current_size += value.size();
 	}
 
+	//this->current_size += value.size() + key.size();
+	//cout << this->current_size << endl;
 	return true;
 }
 
@@ -79,10 +92,13 @@ bool MapBasedGlobalLockImpl::Delete(const std::string &key) {
 		p.first = (*it).second.first;
 		p.second = (*it).first;
 
+		this->current_size -= ((*it).second.second.size() + p.second.size());
+
 		this->_priorities.erase(p);
 		this->_backend.erase(it);
 	}
 
+	//cout << this->current_size << endl;
 	return true;
 }
 
@@ -96,7 +112,7 @@ bool MapBasedGlobalLockImpl::Get(const std::string &key, std::string &value) con
 
 	value = it->second.second;
 
-	return true; 
+	return true;
 }
 } // namespace Backend
 } // namespace Afina

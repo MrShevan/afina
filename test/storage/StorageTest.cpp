@@ -49,7 +49,7 @@ TEST(StorageTest, PutIfAbsent) {
     EXPECT_TRUE(storage.Get("KEY1", value));
     EXPECT_TRUE(value == "val1");
 }
-
+/*
 TEST(StorageTest, BigTest) {
     MapBasedGlobalLockImpl storage(100000);
 
@@ -82,6 +82,7 @@ TEST(StorageTest, BigTest) {
     }
 
 }
+
 
 TEST(StorageTest, MaxTest) {
     MapBasedGlobalLockImpl storage(1000);
@@ -123,4 +124,21 @@ TEST(StorageTest, MaxTest) {
         std::string res;
         EXPECT_FALSE(storage.Get(key, res));
     }
+}
+*/
+
+TEST(StorageTest, SmallMemory_no_1) {
+MapBasedGlobalLockImpl storage(2);
+std::string value;
+
+storage.Put("k", "v");
+
+EXPECT_TRUE(storage.Get("k", value));
+EXPECT_TRUE(value == "v");
+
+storage.Put("q", "v");
+EXPECT_FALSE(storage.Get("k", value));
+EXPECT_TRUE(storage.Get("q", value));
+EXPECT_TRUE(value == "v");
+
 }

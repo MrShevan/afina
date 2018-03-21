@@ -19,7 +19,7 @@ namespace Backend {
  */
 class MapBasedGlobalLockImpl : public Afina::Storage {
 public:
-    MapBasedGlobalLockImpl(size_t max_size = 1024) : _max_size(max_size) {}
+    MapBasedGlobalLockImpl(size_t max_size = 1024) : _max_size(max_size),  current_size(0) {}
     ~MapBasedGlobalLockImpl() {}
 
     // Implements Afina::Storage interface
@@ -43,10 +43,11 @@ private:
             return a.first <= b.first;
         }
     };
-
+    
     std::mutex _lock;
 
     size_t _max_size;
+    size_t current_size;
 
     std::map< std::string, std::pair<size_t, std::string> > _backend;
     std::set< std::pair<size_t, std::string>, comparator> _priorities;
